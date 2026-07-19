@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fno-flow-prediction"
+version = "0.1.0"
+description = "FNO vs UNet surrogate modelling for parametric PDEs (1D Burgers), zero-dep offline core + optional torch training."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "李想 (Li Xiang)" }]
+keywords = ["fourier-neural-operator", "pde", "surrogate", "unet", "burgers"]
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+torch = ["torch>=1.13"]
+dev = ["pytest>=7.0", "ruff"]
+viz = ["matplotlib"]
+
+[project.scripts]
+fno-flow = "fno_flow.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100

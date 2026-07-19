@@ -1,0 +1,15 @@
+{
+  "equation": "1D viscous Burgers",
+  "nu": 0.01,
+  "T": 1.0,
+  "n_grid": 256,
+  "dx": 0.00390625,
+  "dt": 0.0005,
+  "dataset": {
+    "n_samples": 256,
+    "seed": 1234
+  },
+  "fno": { "n_modes": 16, "width": 32, "n_blocks": 4 },
+  "unet": { "width": 16, "k": 7 },
+  "training": { "epochs": 50, "lr": 0.001 }
+}
