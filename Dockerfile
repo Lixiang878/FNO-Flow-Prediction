@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
-LABEL org.opencontainers.image.source="https://github.com/Lixiang878/fno-flow-prediction"
+LABEL org.opencontainers.image.source="https://github.com/Lixiang878/FNO-Flow-Prediction"
 LABEL org.opencontainers.image.description="FNO vs UNet surrogate modelling for parametric PDEs (1D Burgers)"
 
 WORKDIR /app
