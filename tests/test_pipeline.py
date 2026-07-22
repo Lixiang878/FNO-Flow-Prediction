@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from fno_flow import (
     FNO1D,
@@ -61,3 +62,28 @@ def test_lowres_baseline_finite_positive():
     err = lowres_solver_error(data["u"][:1], data["a"][:1], n_coarse=64)
     assert err > 0.0
     assert np.isfinite(err)
+
+
+def test_burgers_mass_conserved_periodic():
+    rng = np.random.default_rng(7)
+    for _ in range(5):
+        n = 128
+        u0 = rng.standard_normal(n)
+        u = burgers_solver(u0, nu=0.02, T=0.3, dt=0.0005, dx=1.0 / n)
+        # Periodic BC + telescoping flux => total mass is conserved.
+        assert np.isclose(u.sum(), u0.sum(), rtol=1e-6)
+
+
+def test_burgers_T0_returns_initial():
+    u0 = np.sin(2 * np.pi * np.linspace(0, 1, 64, endpoint=False))
+    u = burgers_solver(u0, T=0.0, dt=0.0005, dx=1.0 / 64)
+    assert np.allclose(u, u0)
+
+
+def test_burgers_rejects_invalid_params():
+    u0 = np.ones(8)
+    for kw in (dict(dx=0), dict(dt=0), dict(nu=-1), dict(T=-1)):
+        with pytest.raises(ValueError):
+            burgers_solver(u0, **kw)
+    with pytest.raises(ValueError):
+        burgers_solver(np.array([]))

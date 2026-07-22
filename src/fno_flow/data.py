@@ -4,10 +4,12 @@ The equation is
 
     u_t + (u^2 / 2)_x = nu * u_xx,      periodic BC on [0, 1]
 
-We use a Lax-Friedrichs finite-difference scheme (diffusive but unconditionally
-stable for the chosen step sizes) to produce *ground-truth* full-resolution
-solutions. The same solver at a coarser resolution serves as the "classical
-numerical baseline" the neural operators are compared against.
+We use an Engquist-Osher (monotone, shock-capturing, entropy-satisfying) flux
+for the convective term plus central differences for diffusion. The scheme is
+diffusive but unconditionally stable for the chosen step sizes, and is used to
+produce *ground-truth* full-resolution solutions. The same solver at a coarser
+resolution serves as the "classical numerical baseline" the neural operators are
+compared against.
 
 Everything here is pure numpy so the dataset can be built and the baselines
 evaluated with **no optional dependencies**.
@@ -28,18 +30,36 @@ def burgers_solver(
 ) -> np.ndarray:
     """Solve 1D viscous Burgers' from initial field ``u0`` to time ``T``.
 
-    Uses a **Godunov (exact Riemann) flux** for the convective term
-    (monotone and shock-capturing) plus central differences for diffusion,
-    with periodic boundaries. Returns the final field of shape ``(n_grid,)``.
+    Uses an **Engquist-Osher flux** for the convective term
+    (monotone, shock-capturing, entropy-satisfying) plus central differences for
+    diffusion, with periodic boundaries. Returns the final field of shape
+    ``(n_grid,)``.
+
+    Raises ``ValueError`` on invalid parameters (non-positive ``dx``/``dt``,
+    negative ``nu``/``T``, empty ``u0``). With ``T == 0`` the initial field is
+    returned unchanged.
     """
     u0 = np.asarray(u0, dtype=float)
-    n = u0.shape[0]
-    n_steps = max(1, int(round(T / dt)))
+    if u0.ndim == 2 and u0.shape[0] == 1:
+        u0 = u0.reshape(-1)  # accept a leading singleton batch dim
+    if u0.ndim != 1 or u0.shape[0] < 1:
+        raise ValueError("u0 must be a non-empty 1-D array")
+    if not (dx > 0):
+        raise ValueError("dx must be positive")
+    if not (dt > 0):
+        raise ValueError("dt must be positive")
+    if nu < 0:
+        raise ValueError("nu must be non-negative")
+    if T < 0:
+        raise ValueError("T must be non-negative")
+    n_steps = int(round(T / dt))
+    if n_steps <= 0:
+        return u0.copy()  # T == 0: no evolution
     u = u0.copy()
     for _ in range(n_steps):
         uL = u
         uR = np.roll(u, -1)  # right neighbour
-        # Exact Godunov flux for convex f(u)=u^2/2:
+        # Engquist-Osher flux for convex f(u) = u^2/2:
         F = 0.5 * np.maximum(uL, 0.0) ** 2 + 0.5 * np.minimum(uR, 0.0) ** 2
         F_left = np.roll(F, 1)  # flux at the i-1/2 interface
         divF = (F - F_left) / dx
