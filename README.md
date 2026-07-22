@@ -213,45 +213,6 @@ Two further, more honest research angles are left explicit in the roadmap:
 > standard exact-Riemann scheme for hyperbolic conservation laws, included so
 > the "truth" the surrogates learn from is itself principled, not a black box.
 
-### Research significance (研究意义)
-
-This repo is **not** a SOTA surrogate and does not claim to beat the reference
-`neuraloperator` library. Its research value is as a *controlled, reproducible
-teaching instrument* for the central question in operator learning:
-
-> **What does a neural operator buy over a grid-fixed conv net, and can that
-> advantage be *verified* rather than asserted?**
-
-The literature answer — and the property this repo is built to demonstrate — is
-**resolution invariance** (Li et al., *Fourier Neural Operator for Parametric
-PDEs*, ICLR 2021, arXiv:2010.08895; the same paper reports FNO as the first
-ML method with zero-shot super-resolution on turbulent flows and up to three
-orders of magnitude faster than classical solvers). Resolution invariance is a
-structural claim: because the spectral convolution keeps only the lowest
-Fourier modes and applies grid-independent complex weights, the *same* weights
-infer on any grid. A U-Net, by contrast, is tied to the training resolution.
-
-Why that matters for real engineering: a surrogate that must be retrained when
-the mesh changes does not truly "learn the operator" — it learns one
-discretisation. The repo makes this gap *observable* with one command
-(`fno-flow demo` runs the FNO on a grid it never saw). That is the kind of
-evidence a reviewer or a paper appendix needs, and it is exactly what most
-"FNO notebook" demos omit.
-
-Two further, more honest research angles are left explicit in the roadmap:
-- **Super-resolution probe**: train on a coarse grid, infer on a fine one — the
-  operator's defining edge over conv nets, currently unimplemented.
-- **Cost–accuracy trade-off**: measure inference time vs a classical solver at
-  parity error (the "3 orders of magnitude" claim is only meaningful at equal
-  accuracy, which this repo does not yet quantify).
-
-> Scoping note: Burgers is the *canonical* operator-learning benchmark (it
-> appears in the FNO paper itself), chosen here because its shock structure
-> exercises both the convection and diffusion terms while staying 1D and
-> numpy-tractable. The Godunov flux used in the solver (Godunov, 1959) is the
-> standard exact-Riemann scheme for hyperbolic conservation laws, included so
-> the "truth" the surrogates learn from is itself principled, not a black box.
-
 ### Roadmap
 
 - [ ] 2D Darcy flow (the FNO paper's headline case) with a torch 2D FNO.
