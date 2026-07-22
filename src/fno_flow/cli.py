@@ -15,11 +15,12 @@ from . import FNO1D, UNet1D, generate_dataset, lowres_solver_error, relative_l2
 def cmd_gen(args: argparse.Namespace) -> int:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+    dx = args.dx if args.dx is not None else 1.0 / args.grid
     data = generate_dataset(
         n_samples=args.samples, n_grid=args.grid, nu=args.nu, T=args.T,
-        seed=args.seed, out_path=out,
+        dx=dx, seed=args.seed, out_path=out,
     )
-    print(f"[gen] wrote {out}  ({data['a'].shape[0]} samples, grid={args.grid})")
+    print(f"[gen] wrote {out}  ({data['a'].shape[0]} samples, grid={args.grid}, dx={dx:.6f})")
     return 0
 
 
@@ -69,8 +70,10 @@ def cmd_train(args: argparse.Namespace) -> int:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     for name in ("fno", "unet"):
+        per = out.parent / f"{out.stem}_{name}{out.suffix}"
         m = train(name, epochs=args.epochs, lr=args.lr,
-                  n_samples=args.samples, seed=args.seed, out_json=str(out))
+                  n_samples=args.samples, seed=args.seed, out_json=str(per))
+        print(f"# {name} -> {per}")
         print(json.dumps(m, indent=2))
     return 0
 
@@ -88,6 +91,8 @@ def main() -> int:
     g.add_argument("--nu", type=float, default=0.01)
     g.add_argument("--T", type=float, default=1.0)
     g.add_argument("--seed", type=int, default=1234)
+    g.add_argument("--dx", type=float, default=None,
+                   help="grid spacing (default 1/grid)")
     g.add_argument("--out", default="data/burgers.npz")
     g.set_defaults(func=cmd_gen)
 
@@ -112,15 +117,5 @@ def main() -> int:
     return args.func(args)
 
 
-def np_mean(xs):
-    import numpy as np
-    return float(np.mean(xs))
-
-
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-def np_mean(xs):
-    import numpy as np
-    return float(np.mean(xs))

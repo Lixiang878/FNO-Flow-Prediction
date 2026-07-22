@@ -52,7 +52,7 @@ def lowres_solver_error(
     n_fine = truth_u.shape[-1]
     a_coarse = _downsample(a, n_coarse)
     dx_coarse = 1.0 / n_coarse
-    dt = dx_coarse / 4.0  # CFL-safe for the Lax-Friedrichs step
+    dt = dx_coarse / 4.0  # CFL-safe for the Engquist-Osher step
     u_coarse = burgers_solver(a_coarse, nu=nu, T=T, dt=dt, dx=dx_coarse)
     u_up = _upsample_linear(u_coarse[None, :] if u_coarse.ndim == 1 else u_coarse,
                             n_fine)
