@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "FNO-Flow-Prediction: FNO vs UNet for Parametric PDE Surrogate Modelling"
+authors:
+  - family-names: Li
+    given-names: Xiang
+type: software
+version: 1.0.0
+date-released: "2026-07-22"
+license: MIT
+repository-code: "https://github.com/Lixiang878/FNO-Flow-Prediction"
+keywords:
+  - fourier-neural-operator
+  - pde
+  - surrogate-model
+  - scientific-ml
+abstract: "FNO vs UNet for parametric PDE surrogate modelling (1D Burgers): resolution-invariance, offline-first, zero-dep core plus optional torch. A fair, runnable comparison."
