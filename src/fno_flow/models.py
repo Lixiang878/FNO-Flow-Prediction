@@ -49,7 +49,7 @@ class FNO1D:
 
     def _spectral_conv(self, x: np.ndarray, b: int) -> np.ndarray:
         # x: (B, w, N)
-        B, w, N = x.shape
+        _B, w, N = x.shape
         modes = min(self.n_modes, N // 2 + 1)
         X = np.fft.rfft(x, axis=-1)  # (B, w, N//2+1)
         out = np.zeros_like(X)
@@ -79,7 +79,7 @@ class FNO1D:
 def _conv1d(x: np.ndarray, w: np.ndarray, b: np.ndarray, stride: int = 1,
             padding: str = "same") -> np.ndarray:
     """Simple 1D convolution. w: (Cout, Cin, k). x: (B, Cin, L)."""
-    B, Cin, L = x.shape
+    B, _Cin, L = x.shape
     Cout, _, k = w.shape
     if padding == "same":
         pad = k // 2
@@ -127,7 +127,7 @@ class UNet1D:
         if x.ndim == 2:
             x = x[:, None, :]
         # pad to multiple of 4 for clean pooling
-        B, _, L = x.shape
+        _B, _, L = x.shape
         pad = (4 - L % 4) % 4
         if pad:
             x = np.pad(x, ((0, 0), (0, 0), (0, pad)), mode="edge")

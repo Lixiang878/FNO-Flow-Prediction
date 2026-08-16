@@ -16,6 +16,7 @@ is the operator's real edge.
 ---
 
 <p align="center">
+  <a href="https://github.com/Lixiang878/FNO-Flow-Prediction/actions/workflows/ci.yml"><img src="https://github.com/Lixiang878/FNO-Flow-Prediction/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/python-3.9%2B-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/core%20deps-numpy%20only-brightgreen.svg" alt="Core deps">
   <img src="https://img.shields.io/badge/optional-torch%20(lazy)-blue.svg" alt="Optional torch">

@@ -6,15 +6,15 @@ path (lazy-imported) used only for real training. This mirrors the "offline-firs
 real model optional" pattern of the sibling portfolio projects.
 """
 
+from .baseline import lowres_solver_error, relative_l2
 from .data import burgers_solver, generate_dataset
 from .models import FNO1D, UNet1D
-from .baseline import lowres_solver_error, relative_l2
 
 __all__ = [
-    "burgers_solver",
-    "generate_dataset",
     "FNO1D",
     "UNet1D",
+    "burgers_solver",
+    "generate_dataset",
     "lowres_solver_error",
     "relative_l2",
 ]

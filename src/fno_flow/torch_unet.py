@@ -7,7 +7,7 @@ class TorchUNet1D:
     """Compact 1D U-Net with skip connections, implemented in torch."""
 
     def __init__(self, width: int = 16, k: int = 7):
-        import torch.nn as nn
+        from torch import nn
 
         self.width = width
         self.enc1 = nn.Sequential(nn.Conv1d(1, width, k, padding=k // 2), nn.ReLU())

@@ -52,7 +52,7 @@ def burgers_solver(
         raise ValueError("nu must be non-negative")
     if T < 0:
         raise ValueError("T must be non-negative")
-    n_steps = int(round(T / dt))
+    n_steps = round(T / dt)
     if n_steps <= 0:
         return u0.copy()  # T == 0: no evolution
     u = u0.copy()

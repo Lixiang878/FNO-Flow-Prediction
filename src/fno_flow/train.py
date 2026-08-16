@@ -10,8 +10,6 @@ from __future__ import annotations
 
 import json
 
-import numpy as np
-
 
 def _require_torch():
     try:
@@ -28,7 +26,8 @@ class TorchFNO1D:
     """Torch Fourier Neural Operator (1D). Mirrors the numpy FNO1D."""
 
     def __init__(self, n_modes: int = 16, width: int = 32, n_blocks: int = 4):
-        import torch.nn as nn
+        import torch
+        from torch import nn
 
         self.n_modes = n_modes
         self.width = width
@@ -48,7 +47,7 @@ class TorchFNO1D:
     def _spectral(self, x, b):
         import torch
 
-        B, w, N = x.shape
+        _B, w, N = x.shape
         modes = min(self.n_modes, N // 2 + 1)
         X = torch.fft.rfft(x)
         out = torch.zeros_like(X)
@@ -59,9 +58,10 @@ class TorchFNO1D:
         return torch.fft.irfft(out, n=N)
 
     def forward(self, x):
+        import torch
+
         # x: (B, 1, N)
-        B, _, N = x.shape
-        w = self.width
+        _B, _, _N = x.shape
         h = self.lift(x.transpose(1, 2))  # (B, N, w) -> transpose back
         h = h.transpose(1, 2)  # (B, w, N)
         for b in range(self.n_blocks):
@@ -79,7 +79,7 @@ def train(model_name: str = "fno", *, epochs: int = 50, lr: float = 1e-3,
           n_samples: int = 200, seed: int = 1234, out_json: str = "results/train_metrics.json"):
     """Train one model on Burgers data and return a metrics dict."""
     torch = _require_torch()
-    import torch.nn as nn
+    from torch import nn
 
     from .data import generate_dataset
 

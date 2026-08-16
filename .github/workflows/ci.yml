@@ -23,6 +23,6 @@ jobs:
           pip install -e .
           pip install pytest ruff
       - name: Lint
-        run: ruff check src tests || true
+        run: ruff check src tests
       - name: Test
         run: pytest -q

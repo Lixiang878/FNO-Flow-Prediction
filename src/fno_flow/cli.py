@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import FNO1D, UNet1D, generate_dataset, lowres_solver_error, relative_l2
+from . import FNO1D, UNet1D, generate_dataset, lowres_solver_error
 
 
 def cmd_gen(args: argparse.Namespace) -> int:

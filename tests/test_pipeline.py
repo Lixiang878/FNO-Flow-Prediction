@@ -82,7 +82,7 @@ def test_burgers_T0_returns_initial():
 
 def test_burgers_rejects_invalid_params():
     u0 = np.ones(8)
-    for kw in (dict(dx=0), dict(dt=0), dict(nu=-1), dict(T=-1)):
+    for kw in ({"dx": 0}, {"dt": 0}, {"nu": -1}, {"T": -1}):
         with pytest.raises(ValueError):
             burgers_solver(u0, **kw)
     with pytest.raises(ValueError):
