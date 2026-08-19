@@ -61,6 +61,39 @@ def cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_train_2d(args: argparse.Namespace) -> int:
+    try:
+        from .fracture import train_2d
+        metrics = train_2d(args.data, epochs=args.epochs, width=args.width,
+                           modes=args.modes, lr=args.lr, seed=args.seed,
+                           checkpoint=args.checkpoint)
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps(metrics, indent=2))
+    return 0
+
+
+def _run_2d_report(args: argparse.Namespace, *, save_fields: bool) -> int:
+    try:
+        from .fracture import evaluate_2d, infer_2d
+        runner = infer_2d if save_fields else evaluate_2d
+        report = runner(args.data, args.checkpoint, split=args.split, output=args.out)
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+def cmd_evaluate_2d(args: argparse.Namespace) -> int:
+    return _run_2d_report(args, save_fields=False)
+
+
+def cmd_infer_2d(args: argparse.Namespace) -> int:
+    return _run_2d_report(args, save_fields=True)
+
+
 def cmd_train(args: argparse.Namespace) -> int:
     try:
         from .train import train
@@ -112,6 +145,28 @@ def main() -> int:
     t.add_argument("--seed", type=int, default=1234)
     t.add_argument("--out", default="results/train_metrics.json")
     t.set_defaults(func=cmd_train)
+
+    t2 = sub.add_parser("train-2d", help="train a 2D fracture pressure surrogate")
+    t2.add_argument("--data", required=True, help="fracture-flow-bench .npz export")
+    t2.add_argument("--epochs", type=int, default=5)
+    t2.add_argument("--width", type=int, default=16)
+    t2.add_argument("--modes", type=int, default=12)
+    t2.add_argument("--lr", type=float, default=1e-3)
+    t2.add_argument("--seed", type=int, default=1234)
+    t2.add_argument("--checkpoint", default="results/fracture_fno.pt")
+    t2.set_defaults(func=cmd_train_2d)
+
+    for name, handler, help_text in (
+        ("evaluate-2d", cmd_evaluate_2d, "evaluate a saved 2D checkpoint on one split"),
+        ("infer-2d", cmd_infer_2d, "infer fields and optionally save predictions"),
+    ):
+        ev = sub.add_parser(name, help=help_text)
+        ev.add_argument("--data", required=True, help="fracture-flow-bench .npz export")
+        ev.add_argument("--checkpoint", required=True)
+        ev.add_argument("--split", choices=("train", "val", "test"), default="test")
+        ev.add_argument("--out", default=None,
+                        help="JSON report (evaluate) or .npz fields/report (infer)")
+        ev.set_defaults(func=handler)
 
     args = p.parse_args()
     return args.func(args)

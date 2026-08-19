@@ -69,9 +69,9 @@ flowchart LR
 
 ### Features
 
-- **Zero-core-dependency data & baselines**: 1D Burgers solver (Lax–Friedrichs),
-  classical under-resolved solver baseline, and both model forward passes run on
-  numpy alone.
+- **Zero-core-dependency data & baselines**: 1D Burgers solver, classical
+  under-resolved baseline, and both model forward passes run on numpy alone.
+  The optional fracture-flow path exports 2D Reynolds pressure targets.
 - **FNO1D**: genuine spectral convolution (FFT → keep low modes → learnable
   complex weights → IFFT) with a pointwise branch and ReLU blocks.
 - **UNet1D**: compact encoder–decoder with skip connections.
@@ -114,6 +114,35 @@ fno-flow demo
 The classical low-res solver's ~0.18 relative error is the bar the *trained*
 surrogates must beat; the FNO/UNet forward passes confirm the architectures run
 and (for the FNO) generalise across grids even before training.
+
+### Fracture-flow 2D surrogate
+
+`fracture-flow-bench` exports deterministic aperture/pressure fields as a
+NumPy archive. After installing both repositories in editable mode, train a
+compact pressure-field FNO without coupling their Python packages:
+
+```bash
+python -m fracture_flow_bench export --out results/fracture_dataset.npz
+fno-flow train-2d --data results/fracture_dataset.npz \
+  --epochs 20 --checkpoint results/fracture_fno.pt
+
+# Evaluate the saved checkpoint on the held-out test conditions:
+fno-flow evaluate-2d --data results/fracture_dataset.npz \
+  --checkpoint results/fracture_fno.pt --out results/evaluation.json
+
+# Infer and persist predicted/true fields for plotting or downstream analysis:
+fno-flow infer-2d --data results/fracture_dataset.npz \
+  --checkpoint results/fracture_fno.pt --out results/inference.npz
+```
+
+`evaluate-2d` reports field relative-L2, discharge error, predicted-flow
+mass imbalance, and inlet/outlet pressure-boundary errors. `infer-2d` writes
+`p_pred`, `p_true`, `b`, and the test sample indices to the NPZ file.
+
+The loader validates the schema and condition-level splits. The 2D model uses
+normalized aperture plus `(x, y)` coordinates and stores normalization
+statistics in its checkpoint. It is a fixed-grid lubrication-regime surrogate
+baseline, not a replacement for OpenFOAM or full Navier--Stokes.
 
 ### Train (needs torch)
 

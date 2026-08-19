@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from torch import nn
 
-class TorchUNet1D:
+
+class TorchUNet1D(nn.Module):
     """Compact 1D U-Net with skip connections, implemented in torch."""
 
     def __init__(self, width: int = 16, k: int = 7):
-        from torch import nn
-
+        super().__init__()
         self.width = width
         self.enc1 = nn.Sequential(nn.Conv1d(1, width, k, padding=k // 2), nn.ReLU())
         self.pool = nn.AvgPool1d(2)
@@ -32,6 +33,3 @@ class TorchUNet1D:
         cat = torch.cat([p1, up], dim=1)
         d1 = self.up(self.dec1(cat))
         return self.head(d1)[:, 0, :]
-
-    def __call__(self, x):
-        return self.forward(x)

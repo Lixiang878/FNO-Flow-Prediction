@@ -9,6 +9,7 @@ with ``python -m fno_flow.train`` (requires ``torch`` and ``numpy``).
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 
 def _require_torch():
@@ -22,13 +23,20 @@ def _require_torch():
         ) from exc
 
 
-class TorchFNO1D:
+def _nn_module_base():
+    """Resolve nn.Module lazily so NumPy-only installs still import this module."""
+    torch = _require_torch()
+    return torch.nn.Module
+
+
+class TorchFNO1D(_nn_module_base()):
     """Torch Fourier Neural Operator (1D). Mirrors the numpy FNO1D."""
 
     def __init__(self, n_modes: int = 16, width: int = 32, n_blocks: int = 4):
         import torch
         from torch import nn
 
+        super().__init__()
         self.n_modes = n_modes
         self.width = width
         self.n_blocks = n_blocks
@@ -71,8 +79,6 @@ class TorchFNO1D:
         out = self.proj(h.transpose(1, 2))  # (B, N, 1)
         return out.transpose(1, 2)[:, 0, :]  # (B, N)
 
-    def __call__(self, x):
-        return self.forward(x)
 
 
 def train(model_name: str = "fno", *, epochs: int = 50, lr: float = 1e-3,
@@ -118,7 +124,9 @@ def train(model_name: str = "fno", *, epochs: int = 50, lr: float = 1e-3,
         "train_samples": int(n - n_val),
         "val_relative_l2": round(val_rel, 4),
     }
-    with open(out_json, "w", encoding="utf-8") as fh:
+    out_path = Path(out_json)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as fh:
         json.dump(metrics, fh, indent=2)
     return metrics
 
